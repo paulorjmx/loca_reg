@@ -44,7 +44,7 @@ FILE *abrir_arquivo(char *nome_arquivo, char *modo) // Abre o arquivo
 void menu()
 {
     int escolha = 0;
-    while(escolha >= 0)
+    while(escolha > -1)
     {
         CLEAR_SCREEN();
         printf("####################################################\n");
@@ -87,6 +87,10 @@ void menu()
                 break;
 
             case 5:
+                // quick_sort(g_mem);
+                if(salva_alteracoes("locadora.dtb", g_mem) != 0)
+                    printf("NAO FOI POSSIVEL SALVAR AS ALTERACOES\n");
+                free(g_mem);
                 escolha = -1;
                 break;
 
@@ -119,34 +123,60 @@ int return_last_id()
 
 void insert_game()
 {
-    FILE *arquivo = abrir_arquivo("locadora.dtb", "a+b");
-    GAME jogo, tmp_jogo;
-    jogo.id = return_last_id() + 1;
-    CLEAR_SCREEN();
-    printf("\nDigite o nome do jogo: ");
-    scanf(" %[^\n]s", jogo.nome);
-    printf("\nDigite o genero do jogo: ");
-    scanf(" %[^\n]s", jogo.genero);
+    printf("%d\n", qt_games);
+    // CLEAR_SCREEN();
+    if(qt_games != 0)
+    {
+        qt_games += 1;
+        printf("ANTES DE ALOCAR\n");
+        g_mem = (GAME *) realloc(g_mem, sizeof(GAME) * qt_games);
+        printf("DEPOIS DE ALOCAR\n");
+        g_mem[qt_games-1].id = return_last_id() + 1;
+        printf("\nDigite o nome do jogo: ");
+        scanf(" %[^\n]s", g_mem[qt_games-1].nome);
+        printf("\nDigite o genero do jogo: ");
+        scanf(" %[^\n]s", g_mem[qt_games-1].genero);
+    }
+    else
+    {
+        qt_games += 1;
+        g_mem = (GAME *) malloc(sizeof(GAME) * qt_games);
+        g_mem[0].id = qt_games + 1;
+        printf("\nDigite o nome do jogo: ");
+        scanf(" %[^\n]s", g_mem[0].nome);
+        printf("\nDigite o genero do jogo: ");
+        scanf(" %[^\n]s", g_mem[0].genero);
+    }
+
+    printf("\nDeseja inserir mais algum jogo? [s/n]: ");
+    scanf(" %c", &escolha);
+
+    if( escolha == 's' || escolha == 'S' )
+    {
+        CLEAR_SCREEN();
+        insert_game();
+    }
+    else
+    {
+        menu();
+    }
 }
 
 void show_games()
 {
-    int times = 0, i = 0;
-    GAME *jogo = load_into_mem(-1, &times);
-    printf("%d\n", times);
+    int i = 0;
     printf("%-5s %-30s %-15s\n","ID:","NOME:","GENERO:");
-    for(i = 0; i < times; i++)
+    for(i = 0; i < qt_games; i++)
     {
-        printf("%-5d", jogo[i].id);
-        printf("%-30s", jogo[i].nome);
-        printf("%-15s\n", jogo[i].genero);
+        printf("%-5d", g_mem[i].id);
+        printf("%-30s", g_mem[i].nome);
+        printf("%-15s\n", g_mem[i].genero);
     }
-    free(jogo);
 
     printf("\nDeseja voltar ao menu? [s/n]: ");
-    scanf("%s", escolha);
+    scanf(" %c", &escolha);
 
-    if( (strcmp(escolha, "s") == 0) || (strcmp(escolha, "S") == 0) )
+    if( escolha == 's' || escolha == 'S' )
     {
         menu();
     }
@@ -157,21 +187,41 @@ GAME *load_into_mem(int amount, int *times_req)
     FILE *arquivo = abrir_arquivo("locadora.dtb", "rb");
     void *tmp_ptr = NULL;
     GAME *buffer_mem = NULL;
-    if(amount > 0)
+    fseek(arquivo, 0, SEEK_END);
+    long f_siz = ftell(arquivo);
+    if(f_siz != 0)
     {
-        buffer_mem = (GAME *) malloc(sizeof(GAME) * amount);
-        fread(buffer_mem, sizeof(GAME), amount, arquivo);
-    }
-    else
-    {
-        fseek(arquivo, 0, SEEK_END);
-        long f_siz = ftell(arquivo);
-        tmp_ptr = malloc(f_siz);
-        rewind(arquivo);
-        *times_req = f_siz / (sizeof(GAME));
-        buffer_mem = (GAME *) tmp_ptr;
-        fread(tmp_ptr, f_siz, 1, arquivo);
+        if(amount > 0)
+        {
+            rewind(arquivo);
+            buffer_mem = (GAME *) malloc(sizeof(GAME) * amount);
+            fread(buffer_mem, sizeof(GAME), amount, arquivo);
+        }
+        else
+        {
+
+            tmp_ptr = malloc(f_siz);
+            rewind(arquivo);
+            *times_req = f_siz / (sizeof(GAME));
+            buffer_mem = (GAME *) tmp_ptr;
+            fread(tmp_ptr, f_siz, 1, arquivo);
+        }
     }
     fclose(arquivo);
     return buffer_mem;
+}
+
+int salva_alteracoes(char *nome_arquivo, GAME *data_tob_write)
+{
+    size_t bytes_writed;
+    FILE *arquivo = abrir_arquivo("locadora.dtb", "wb");
+    bytes_writed = fwrite(data_tob_write, qt_games, sizeof(GAME), arquivo);
+    if(bytes_writed > 0)
+    {
+        return 0;
+    }
+    else
+    {
+        return 1;
+    }
 }
