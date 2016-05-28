@@ -123,14 +123,11 @@ int return_last_id()
 
 void insert_game()
 {
-    printf("%d\n", qt_games);
-    // CLEAR_SCREEN();
+    CLEAR_SCREEN();
     if(qt_games != 0)
     {
         qt_games += 1;
-        printf("ANTES DE ALOCAR\n");
         g_mem = (GAME *) realloc(g_mem, sizeof(GAME) * qt_games);
-        printf("DEPOIS DE ALOCAR\n");
         g_mem[qt_games-1].id = return_last_id() + 1;
         printf("\nDigite o nome do jogo: ");
         scanf(" %[^\n]s", g_mem[qt_games-1].nome);
