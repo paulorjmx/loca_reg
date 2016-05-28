@@ -11,7 +11,7 @@
     } GAME;
 
 
-	VETOR_LISTA **generos; // ponteiro que irá apontar para os genêros dos jogos seguindo a ordem:
+	// ponteiro que irá apontar para os genêros dos jogos seguindo a ordem:
 	/*
 		0 = FPS;
 		1 = HACK N SLASH;
@@ -29,14 +29,16 @@
 
 
     // Variáveis globais
-    char escolha[2];
-    GAME *g_mem = NULL;
-    int qt_games = 0;
+    char escolha;
+    GAME *g_mem;
+    int qt_games;
 
-    void insert_game();
-    void show_games();
+    void menu(); // Menu do programa
+    void insert_game(); // Função para inserir um jogo na estrutura g_mem;
+    void show_games(); // Função para mostrar todos os jogos na estrutura g_mem;
     int return_last_id(); // Retorna o último id do último jogo cadastrado
     GAME *load_into_mem(int amount, int *times_req); // Recupera um quantidade 'amount' de dados do arquivo apontado por 'arq'. Se 'amount' for < 0, então será lido o arquivo inteiro.
     FILE *abrir_arquivo(char *nome_arquivo, char *modo); // Abre o arquivo com o nome 'nome_arquivo' em modo 'modo'
     int create_database(char *nome_arquivo); // Cria o arquivo com o nome 'nome_arquivo' e o modo 'modo' como abrirá este arquivo
+    int salva_alteracoes(char *nome_arquivo, GAME *data_tob_write);
 #endif
