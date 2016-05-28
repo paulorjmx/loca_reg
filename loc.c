@@ -8,420 +8,170 @@
     #define CLEAR_SCREEN() system("clear");
 #endif
 
-void init_game(GAME *j_emp)
+int create_database(char *nome_arquivo) // Cria o arquivo
 {
-    j_emp->id = 0;
-    j_emp->deletable = false;
-}
-
-void init_header(HEADER *h_empty)
-{
-    h_empty->signature = 0x445442;
-    h_empty->version = 0x001;
-}
-
-bool file_exists(char *nome_arquivo)
-{
-    FILE *arquivo = abrir_arquivo(nome_arquivo, "rb");
-    if(arquivo == NULL)
+    FILE *arq = fopen(nome_arquivo, "a+b");
+    if(arq != NULL)
     {
-        fclose(arquivo);
-        return false;
+        fclose(arq);
+        return 0;
     }
     else
     {
-        fclose(arquivo);
-        return true;
+        printf("NAO FOI POSSIVEL CRIAR O ARQUIVO DE DADOS\n");
+        return -1;
     }
 }
 
-FILE *abrir_arquivo(char *nome_arquivo, char *modo)
+FILE *abrir_arquivo(char *nome_arquivo, char *modo) // Abre o arquivo
 {
-    FILE *arq = fopen(nome_arquivo, modo);
-    if(arq == NULL)
+    FILE *arq = fopen(nome_arquivo, "rb"); // Abre o arquivo em modo leitura somente, para verificar se o arquivo existe.
+    if(arq != NULL) // Se o arquivo existir
     {
-        printf("\nNAO FOI POSSIVEL ABRIR O ARQUIVO!\n");
-        return NULL;
+        fclose(arq); // Fecha o arquivo no modo somente leitura
+        arq = fopen(nome_arquivo, modo); // Abri novamente o arquivo para o modo especificado na função
     }
-    else
+    else // Senão
     {
-        return arq;
+        if(create_database(nome_arquivo)) // Checa se o arquivo foi criado
+            abrir_arquivo(nome_arquivo, modo); // E abre ele com o modo especificado na função
+        else // Se não foi criado ele retornará NULL
+            arq = NULL;
     }
+    return arq;
 }
 
 void menu()
 {
     int escolha = 0;
-
-    CLEAR_SCREEN();
-    printf("####################################################\n");
-    printf("####################################################\n");
-    printf("# \t\t\t\t\t\t   #");
-    printf("\n#\t\tEscolha uma opcao \t\t   #\n# \t\t\t\t\t\t   #\n");
-    printf("####################################################\n");
-    printf("####################################################\n");
-
-    printf("\n[1] Inserir Game");
-    printf("\n[2] Editar Game");
-    printf("\n[3] Deletar Game");
-    printf("\n[4] Consultar Estoque");
-    printf("\n[5] Sair");
-
-    printf("\n\n->");
-    scanf("%d", &escolha);
-
-    if(escolha == 1)
+    while(escolha >= 0)
     {
-        inserir_game();
-    }
-    else
-    {
-        if(escolha == 2)
+        CLEAR_SCREEN();
+        printf("####################################################\n");
+        printf("####################################################\n");
+        printf("# \t\t\t\t\t\t   #");
+        printf("\n#\t\tEscolha uma opcao \t\t   #\n# \t\t\t\t\t\t   #\n");
+        printf("####################################################\n");
+        printf("####################################################\n");
+
+        printf("\n\t\t[1] Inserir Jogo");
+        printf("\n\t\t[2] Editar Jogo");
+        printf("\n\t\t[3] Deletar Jogo");
+        printf("\n\t\t[4] Consultar Estoque");
+        printf("\n\t\t[5] Sair");
+        printf("\n\t\t-> ");
+        scanf("%d", &escolha);
+
+        switch(escolha)
         {
-            editar_game();
-        }
-        else
-        {
-            if(escolha == 3)
-            {
-                deletar_game();
-            }
-            else
-            {
-                if(escolha == 4)
-                {
-                    mostra_dados();
-                }
-                else
-                {
-                    if(escolha == 5)
-                    {
-                        printf("Adiós!");
-                        return;
-                    }
-                    else
-                    {
-                        printf("\nEscolha uma opcao valida!");
-                        menu();
-                    }
-                }
-            }
+            case 1:
+                insert_game();
+                escolha = -1;
+                break;
+
+            case 2:
+                printf("edit game\n");
+                // edit_game();
+                escolha = -1;
+                break;
+
+            case 3:
+                printf("delete game\n");
+                // delete_game();
+                escolha = -1;
+                break;
+
+            case 4:
+                show_games();
+                escolha = -1;
+                break;
+
+            case 5:
+                escolha = -1;
+                break;
+
+            default:
+                printf("Digite uma opcao valida!\n");
+                break;
         }
     }
 }
 
-void inserir_game() // INSERE DADOS NO ARQUIVO BINÁRIO.
+int return_last_id()
 {
     FILE *arquivo = NULL;
-    GAME jogo, tmp_jogo;
-
-    init_game(&jogo);
-    init_game(&tmp_jogo);
-    arquivo = abrir_arquivo("locadora.dtb", "a+b");
-
+    GAME jogo;
+    arquivo = abrir_arquivo("locadora.dtb", "rb");
+    fseek(arquivo, 0, SEEK_END); // ANDA ATÉ A POSIÇÃO N-1 BYTES
+    long size = ftell(arquivo);
     rewind(arquivo);
-    fseek(arquivo, (-1 * sizeof(GAME)), SEEK_END); // ANDA ATÉ A POSIÇÃO N-1 BYTES
-    fread(&jogo, sizeof(GAME), 1, arquivo); // PEGA O ÚLTIMO BLOCO DO TAMANHO DE "GAME"
-    rewind(arquivo); // VOLTA O INDICADOR DA POSIÇÃO DO ARQUIVO NO COMEÇO
-
-    // FUNCAO AUTO INCREMENT
-    if(jogo.id == 0)
+    if(size > 0)
     {
-        jogo.id = 1; // SE NÃO HOUVER UM "GAME" CADASTRADO ADICIONA O PRIMEIRO ID COM O VALOR DE "1"
+        fread(&jogo, sizeof(GAME), 1, arquivo); // PEGA O ÚLTIMO BLOCO DO TAMANHO DE "GAME"
     }
     else
     {
-        jogo.id += 1; // CASO CONTRÁRIO ADICIONA +1 NO ID DO "GAME" QUE SERÁ CADASTRADO
+        jogo.id = 0;
     }
+    fclose(arquivo);
+    return jogo.id;
+}
 
+void insert_game()
+{
+    FILE *arquivo = abrir_arquivo("locadora.dtb", "a+b");
+    GAME jogo, tmp_jogo;
+    jogo.id = return_last_id() + 1;
     CLEAR_SCREEN();
     printf("\nDigite o nome do jogo: ");
     scanf(" %[^\n]s", jogo.nome);
     printf("\nDigite o genero do jogo: ");
     scanf(" %[^\n]s", jogo.genero);
-
-    while(1)
-    {
-        fread(&tmp_jogo, sizeof(GAME), 1, arquivo);
-        if(feof(arquivo) != 0)
-        {
-            rewind(arquivo);
-            fclose(arquivo);
-            arquivo = abrir_arquivo("locadora.dtb", "a+b");
-            break;
-        }
-        else
-        {
-            if(tmp_jogo.deletable == true)
-            {
-                fclose(arquivo);
-                arquivo = abrir_arquivo("locadora.dtb", "r+b");
-                jogo.id = tmp_jogo.id;
-                fseek(arquivo, (-1 * sizeof(GAME)), SEEK_CUR);
-                break;
-            }
-            else
-            {
-                continue;
-            }
-        }
-    }
-
-    size_t result = fwrite(&jogo, sizeof(GAME), 1, arquivo);
-    if(result == 1)
-    {
-        CLEAR_SCREEN();
-        printf("\nDADOS INSERIDOS COM SUCESSO!");
-        printf("\nDeseja inserir mais dados? [s/n]: ");
-        scanf("%s", escolha);
-
-        if( (strcmp(escolha, "s") == 0) || (strcmp(escolha, "S") == 0) )
-        {
-            fclose(arquivo);
-            CLEAR_SCREEN();
-            inserir_game();
-        }
-        else
-        {
-            fclose(arquivo);
-            CLEAR_SCREEN();
-            menu();
-        }
-    }
-    else
-    {
-        fclose(arquivo);
-        CLEAR_SCREEN();
-        printf("\nOCORREU UM ERRO AO TENTAR INSERIR OS DADOS!\n");
-        menu();
-    }
 }
 
-void editar_game()
+void show_games()
 {
-    int escolha_id = 0;
-    GAME jogo, tmp_jogo;
-    FILE *arquivo = NULL;
-
-    if(file_exists("locadora.dtb") == false)
+    int times = 0, i = 0;
+    GAME *jogo = load_into_mem(-1, &times);
+    printf("%d\n", times);
+    printf("%-5s %-30s %-15s\n","ID:","NOME:","GENERO:");
+    for(i = 0; i < times; i++)
     {
-        printf("\nO ARQUIVO NAO EXISTE!\n");
-        printf("\nDESEJA CRIAR O ARQUIVO? [s/n]: \n");
-        scanf("%s", escolha);
-        if( (strcmp(escolha, "s") == 0) || (strcmp(escolha, "S") == 0) )
-        {
-            arquivo = abrir_arquivo("locadora.dtb", "r+b");
-            fclose(arquivo);
-            menu();
-        }
-        return;
+        printf("%-5d", jogo[i].id);
+        printf("%-30s", jogo[i].nome);
+        printf("%-15s\n", jogo[i].genero);
     }
-    else
-    {
-        arquivo = abrir_arquivo("locadora.dtb", "r+b");
-    }
+    free(jogo);
 
-    mostra_dados();
-
-    rewind(arquivo);
-    printf("\nDigite o ID que deseja editar: ");
-    scanf("%d", &escolha_id);
-
-    while(1)
-    {
-        fread(&jogo, sizeof(GAME), 1, arquivo);
-        if(feof(arquivo) == 0)
-        {
-            if(escolha_id == jogo.id )
-            {
-                tmp_jogo = jogo;
-                fseek(arquivo, (-1 * sizeof(GAME)), SEEK_CUR); // ANDA ATE A POSICAO INICIAL DO DADO ESCOLHIDO
-                break;
-            }
-            else
-            {
-                continue;
-            }
-        }
-        else
-        {
-            printf("\nO ID NAO FOI ENCONTRADO!\n");
-            printf("\nDESEJA VOLTAR AO MENU PRINCIPAL? [s/n]: \n");
-            scanf("%s", escolha);
-
-            if( (strcmp(escolha, "s") == 0) || (strcmp(escolha, "S") == 0) )
-            {
-                menu();
-            }
-            else
-            {
-                return;
-            }
-        }
-    }
-
-    CLEAR_SCREEN();
-    printf("####################################################\n");
-    printf("####################################################\n");
-    printf("# \t\t\t\t\t\t   #");
-    printf("\n#\t\tDADOS DO ID ESCOLHIDO \t\t   #\n# \t\t\t\t\t\t   #\n");
-    printf("####################################################\n");
-    printf("####################################################\n");
-
-    printf("\n[1] NOME: %s", tmp_jogo.nome);
-    printf("\n[2] GENERO: %s", tmp_jogo.genero);
-    printf("\nQUAL DADO DESEJA EDITAR?\n");
-    printf("-> ");
-    scanf("%d", &escolha_id);
-
-    if(escolha_id == 1)
-    {
-        CLEAR_SCREEN();
-        printf("\nDigite o novo nome do jogo: ");
-        scanf(" %[^\n]s", tmp_jogo.nome);
-        fwrite(&tmp_jogo, sizeof(GAME), 1, arquivo);
-    }
-    else
-    {
-        CLEAR_SCREEN();
-        printf("\nDigite o novo genero do jogo: ");
-        scanf(" %[^\n]s", tmp_jogo.genero);
-        fwrite(&tmp_jogo, sizeof(GAME), 1, arquivo);
-    }
-
-    fclose(arquivo);
-    printf("\nDESEJA EDITAR MAIS ALGUM REGISTRO? [s/n]: \n");
+    printf("\nDeseja voltar ao menu? [s/n]: ");
     scanf("%s", escolha);
 
     if( (strcmp(escolha, "s") == 0) || (strcmp(escolha, "S") == 0) )
     {
-        CLEAR_SCREEN();
-        editar_game();
-    }
-    else
-    {
         menu();
     }
 }
 
-void mostra_dados()
+GAME *load_into_mem(int amount, int *times_req)
 {
-    FILE *arquivo;
-    GAME jogo;
-    arquivo = abrir_arquivo("locadora.dtb", "rb");
-    printf("%-5s %-30s %-15s\n","ID:","NOME:","GENERO:");
-    while(1)
+    FILE *arquivo = abrir_arquivo("locadora.dtb", "rb");
+    void *tmp_ptr = NULL;
+    GAME *buffer_mem = NULL;
+    if(amount > 0)
     {
-        fread(&jogo, sizeof(GAME), 1, arquivo);
-        if(feof(arquivo) != 0)
-        {
-            break;
-        }
-        else
-        {
-            if(jogo.deletable == false)
-            {
-                printf("%-5d", jogo.id);
-                printf("%-30s", jogo.nome);
-                printf("%-15s\n", jogo.genero);
-            }
-            else
-            {
-                continue;
-            }
-        }
-    }
-    fclose(arquivo);
-}
-
-void deletar_game()
-{
-    int escolha_id = 0;
-    FILE *arquivo;
-    GAME jogo;
-    if(file_exists("locadora.dtb") == false)
-    {
-        printf("\nO ARQUIVO NAO EXISTE!\n");
-        printf("\nDESEJA CRIAR O ARQUIVO? [s/n]: \n");
-        scanf("%s", escolha);
-        if( (strcmp(escolha, "s") == 0) || (strcmp(escolha, "S") == 0) )
-        {
-            arquivo = abrir_arquivo("locadora.dtb", "r+b");
-            fclose(arquivo);
-            menu();
-        }
-        return;
+        buffer_mem = (GAME *) malloc(sizeof(GAME) * amount);
+        fread(buffer_mem, sizeof(GAME), amount, arquivo);
     }
     else
     {
-        arquivo = abrir_arquivo("locadora.dtb", "r+b");
-        init_game(&jogo);
-        mostra_dados();
-
+        fseek(arquivo, 0, SEEK_END);
+        long f_siz = ftell(arquivo);
+        tmp_ptr = malloc(f_siz);
         rewind(arquivo);
-        printf("\nDigite o ID que deseja deletar: ");
-        scanf("%d", &escolha_id);
-
-        while(1)
-        {
-            fread(&jogo, sizeof(GAME), 1, arquivo);
-            if(feof(arquivo) == 0)
-            {
-                if(jogo.id == escolha_id)
-                {
-                    jogo.deletable = true;
-                    break;
-                }
-                else
-                {
-                    continue;
-                }
-            }
-            else
-            {
-                printf("\nO ID NAO FOI ENCONTRADO!\n");
-                printf("\nDESEJA VOLTAR AO MENU PRINCIPAL? [s/n]: \n");
-                scanf("%s", escolha);
-
-                if( (strcmp(escolha, "s") == 0) || (strcmp(escolha, "S") == 0) )
-                {
-                    menu();
-                }
-                else
-                {
-                    return;
-                }
-            }
-        }
-
-        fseek(arquivo, (-1 * sizeof(GAME)), SEEK_CUR);
-        size_t result = fwrite(&jogo, sizeof(GAME), 1, arquivo);
-        if(result == 1)
-        {
-            CLEAR_SCREEN();
-            printf("\nJOGO DELETADO COM SUCESSO!");
-            printf("\nDeseja deletar mais algum jogo? [s/n]: ");
-            scanf("%s", escolha);
-
-            if( (strcmp(escolha, "s") == 0) || (strcmp(escolha, "S") == 0) )
-            {
-                fclose(arquivo);
-                CLEAR_SCREEN();
-                deletar_game();
-            }
-            else
-            {
-                fclose(arquivo);
-                CLEAR_SCREEN();
-                menu();
-            }
-        }
-        else
-        {
-            fclose(arquivo);
-            CLEAR_SCREEN();
-            printf("\nOCORREU UM ERRO AO TENTAR DELETAR O JOGO!\n");
-            menu();
-        }
+        *times_req = f_siz / (sizeof(GAME));
+        buffer_mem = (GAME *) tmp_ptr;
+        fread(tmp_ptr, f_siz, 1, arquivo);
     }
+    fclose(arquivo);
+    return buffer_mem;
 }
