@@ -8,35 +8,18 @@
     #define CLEAR_SCREEN() system("clear");
 #endif
 
-int create_database(char *nome_arquivo) // Cria o arquivo
+FILE *abrir_arquivo(const char *nome_arquivo, char *modo) // Abre o arquivo
 {
-    FILE *arq = fopen(nome_arquivo, "a+b");
-    if(arq != NULL)
+    FILE *arq;
+    if(access(nome_arquivo, F_OK) != -1) // Checa se o arquivo existe
     {
-        fclose(arq);
-        return 0;
-    }
-    else
-    {
-        printf("NAO FOI POSSIVEL CRIAR O ARQUIVO DE DADOS\n");
-        return -1;
-    }
-}
-
-FILE *abrir_arquivo(char *nome_arquivo, char *modo) // Abre o arquivo
-{
-    FILE *arq = fopen(nome_arquivo, "rb"); // Abre o arquivo em modo leitura somente, para verificar se o arquivo existe.
-    if(arq != NULL) // Se o arquivo existir
-    {
-        fclose(arq); // Fecha o arquivo no modo somente leitura
-        arq = fopen(nome_arquivo, modo); // Abri novamente o arquivo para o modo especificado na função
+        arq = fopen(nome_arquivo, modo); // Abre o arquivo para o modo especificado na função
     }
     else // Senão
     {
-        if(create_database(nome_arquivo)) // Checa se o arquivo foi criado
-            abrir_arquivo(nome_arquivo, modo); // E abre ele com o modo especificado na função
-        else // Se não foi criado ele retornará NULL
-            arq = NULL;
+        arq = fopen(nome_arquivo, "w+b"); // Cria o arquivo
+        fclose(arq);
+        arq = fopen(nome_arquivo, modo); // Abre o arquivo para o modo especificado na função
     }
     return arq;
 }
@@ -70,8 +53,7 @@ void menu()
                 break;
 
             case 2:
-                printf("edit game\n");
-                // edit_game();
+                edit_game();
                 escolha = -1;
                 break;
 
@@ -121,6 +103,11 @@ int return_last_id()
     return jogo.id;
 }
 
+void edit_game()
+{
+
+}
+
 void insert_game()
 {
     CLEAR_SCREEN();
@@ -128,7 +115,7 @@ void insert_game()
     {
         qt_games += 1;
         g_mem = (GAME *) realloc(g_mem, sizeof(GAME) * qt_games);
-        g_mem[qt_games-1].id = return_last_id() + 1;
+        g_mem[qt_games-1].id = qt_games;
         printf("\nDigite o nome do jogo: ");
         scanf(" %[^\n]s", g_mem[qt_games-1].nome);
         printf("\nDigite o genero do jogo: ");
@@ -138,7 +125,7 @@ void insert_game()
     {
         qt_games += 1;
         g_mem = (GAME *) malloc(sizeof(GAME) * qt_games);
-        g_mem[0].id = qt_games + 1;
+        g_mem[0].id = qt_games;
         printf("\nDigite o nome do jogo: ");
         scanf(" %[^\n]s", g_mem[0].nome);
         printf("\nDigite o genero do jogo: ");
@@ -181,11 +168,12 @@ void show_games()
 
 GAME *load_into_mem(int amount, int *times_req)
 {
-    FILE *arquivo = abrir_arquivo("locadora.dtb", "rb");
+    FILE *arquivo = abrir_arquivo("locadora.dtb", "r+b");
     void *tmp_ptr = NULL;
     GAME *buffer_mem = NULL;
     fseek(arquivo, 0, SEEK_END);
     long f_siz = ftell(arquivo);
+    printf("Size of file: %li\n", f_siz);
     if(f_siz != 0)
     {
         if(amount > 0)
@@ -199,16 +187,20 @@ GAME *load_into_mem(int amount, int *times_req)
 
             tmp_ptr = malloc(f_siz);
             rewind(arquivo);
-            *times_req = f_siz / (sizeof(GAME));
+            (*times_req) = f_siz / (sizeof(GAME));
             buffer_mem = (GAME *) tmp_ptr;
             fread(tmp_ptr, f_siz, 1, arquivo);
         }
+    }
+    else
+    {
+        (*times_req) = 0;
     }
     fclose(arquivo);
     return buffer_mem;
 }
 
-int salva_alteracoes(char *nome_arquivo, GAME *data_tob_write)
+int salva_alteracoes(const char *nome_arquivo, GAME *data_tob_write)
 {
     size_t bytes_writed;
     FILE *arquivo = abrir_arquivo("locadora.dtb", "wb");
