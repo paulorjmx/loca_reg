@@ -49,23 +49,30 @@ void menu()
         {
             case 1:
                 insert_game();
-                escolha = -1;
+                if(print_question("Deseja inserir mais algum jogo? [s/n]: ") == 0)
+                {
+                    insert_game();
+                }
                 break;
 
             case 2:
                 edit_game();
-                escolha = -1;
                 break;
 
             case 3:
-                printf("delete game\n");
-                // delete_game();
-                escolha = -1;
+                delete_game();
+                if(print_question("Deseja deletar mais algum jogo? [s/n]: ") == 0)
+                {
+                    delete_game();
+                }
                 break;
 
             case 4:
                 show_games();
-                escolha = -1;
+                if(print_question("Deseja mostrar os jogos cadastrados novamente? [s/n]: ") == 0)
+                {
+                    show_games();
+                }
                 break;
 
             case 5:
@@ -81,6 +88,23 @@ void menu()
                 break;
         }
     }
+}
+
+int print_question(char *question)
+{
+    char escolha;
+    int answer;
+    printf("\n%s", question);
+    scanf(" %c", &escolha);
+    if(escolha == 's' || escolha == 'S')
+    {
+        answer = 0;
+    }
+    else
+    {
+        answer = 1;
+    }
+    return answer;
 }
 
 int return_last_id()
@@ -108,6 +132,17 @@ void edit_game()
 
 }
 
+void delete_game()
+{
+    GAME *g_aux;
+    unsigned int escolha;
+    CLEAR_SCREEN();
+    show_games();
+    printf("Digite o ID do jogo que voce deseja deletar\n");
+    scanf("%u", &escolha);
+    g_aux = binary_search(escolha);
+}
+
 void insert_game()
 {
     CLEAR_SCREEN();
@@ -131,19 +166,6 @@ void insert_game()
         printf("\nDigite o genero do jogo: ");
         scanf(" %[^\n]s", g_mem[0].genero);
     }
-
-    printf("\nDeseja inserir mais algum jogo? [s/n]: ");
-    scanf(" %c", &escolha);
-
-    if( escolha == 's' || escolha == 'S' )
-    {
-        CLEAR_SCREEN();
-        insert_game();
-    }
-    else
-    {
-        menu();
-    }
 }
 
 void show_games()
@@ -155,14 +177,6 @@ void show_games()
         printf("%-5d", g_mem[i].id);
         printf("%-30s", g_mem[i].nome);
         printf("%-15s\n", g_mem[i].genero);
-    }
-
-    printf("\nDeseja voltar ao menu? [s/n]: ");
-    scanf(" %c", &escolha);
-
-    if( escolha == 's' || escolha == 'S' )
-    {
-        menu();
     }
 }
 
@@ -213,4 +227,10 @@ int salva_alteracoes(const char *nome_arquivo, GAME *data_tob_write)
     {
         return 1;
     }
+}
+
+GAME *binary_search(unsigned int id)
+{
+    int limite_superior = qt_games, limite_inferior = 0, meio = 0;
+    meio = (limite_superior + limite_inferior) / 2;
 }
