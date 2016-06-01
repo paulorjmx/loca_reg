@@ -76,7 +76,7 @@ void menu()
                 break;
 
             case 5:
-                // quick_sort(g_mem);
+                //part_mege(g_mem);
                 if(salva_alteracoes("locadora.dtb", g_mem) != 0)
                     printf("NAO FOI POSSIVEL SALVAR AS ALTERACOES\n");
                 free(g_mem);
@@ -138,7 +138,7 @@ void delete_game()
     unsigned int escolha;
     CLEAR_SCREEN();
     show_games();
-    printf("Digite o ID do jogo que voce deseja deletar\n");
+    printf("\nDigite o ID do jogo que voce deseja deletar: ");
     scanf("%u", &escolha);
     g_aux = binary_search(escolha);
 }
@@ -231,6 +231,27 @@ int salva_alteracoes(const char *nome_arquivo, GAME *data_tob_write)
 
 GAME *binary_search(unsigned int id)
 {
+    GAME *g_aux;
     int limite_superior = qt_games, limite_inferior = 0, meio = 0;
     meio = (limite_superior + limite_inferior) / 2;
+    while(limite_superior != limite_inferior)
+    {
+        if(g_mem[meio].id > id)
+        {
+            limite_superior = meio;
+        }
+        else
+        {
+            if(g_mem[meio].id) < id)
+            {
+                limite_inferior = meio;
+            }
+            else
+            {
+                
+            }
+        }
+        meio = (limite_superior + limite_inferior) / 2;
+    }
+    return g_aux;
 }
