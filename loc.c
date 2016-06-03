@@ -141,6 +141,28 @@ void delete_game()
     printf("\nDigite o ID do jogo que voce deseja deletar: ");
     scanf("%u", &escolha);
     g_aux = binary_search(escolha);
+    if(g_aux == NULL)
+    {
+        printf("\nO jogo nao foi encontrado!\n");
+    }
+    else
+    {
+        CLEAR_SCREEN();
+        printf("####################################################\n");
+        printf("####################################################\n");
+        printf("# \t\t\t\t\t\t   #");
+        printf("\n#\t\tDados do jogo encontrado \t   #\n# \t\t\t\t\t\t   #\n");
+        printf("####################################################\n");
+        printf("####################################################\n");
+        printf("\t\t\t%-5s %-30s %-15s\n","ID:","NOME:","GENERO:");
+        printf("\t\t\t%-5d", g_aux->id);
+        printf("\t\t\t%-30s", g_aux->nome);
+        printf("\t\t\t%-15s\n", g_aux->genero);
+        if(print_question("Tem certeza que deseja deletar o jogo?") == 0)
+        {
+            
+        }
+    }
 }
 
 void insert_game()
@@ -231,27 +253,30 @@ int salva_alteracoes(const char *nome_arquivo, GAME *data_tob_write)
 
 GAME *binary_search(unsigned int id)
 {
-    GAME *g_aux;
-    int limite_superior = qt_games, limite_inferior = 0, meio = 0;
-    meio = (limite_superior + limite_inferior) / 2;
-    while(limite_superior != limite_inferior)
+    int limite_superior = qt_games-1, limite_inferior = 0, meio = 0;
+    GAME *g_aux = NULL;
+    while(limite_inferior <= limite_superior)
     {
-        if(g_mem[meio].id > id)
+        meio = (limite_superior + limite_inferior) / 2;
+        if(g_mem[meio].id == id)
         {
-            limite_superior = meio;
+            g_aux = &g_mem[meio];
+            break;
         }
         else
         {
-            if(g_mem[meio].id) < id)
+            if(g_mem[meio].id > id)
             {
-                limite_inferior = meio;
+                limite_superior = meio - 1;
             }
             else
             {
-                
+                if(g_mem[meio].id < id)
+                {
+                    limite_inferior = meio + 1;
+                }
             }
         }
-        meio = (limite_superior + limite_inferior) / 2;
     }
     return g_aux;
 }
