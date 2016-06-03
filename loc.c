@@ -134,7 +134,7 @@ void edit_game()
 
 void delete_game()
 {
-    GAME *g_aux;
+    GAME *g_aux, aux;
     unsigned int escolha;
     CLEAR_SCREEN();
     show_games();
@@ -154,13 +154,25 @@ void delete_game()
         printf("\n#\t\tDados do jogo encontrado \t   #\n# \t\t\t\t\t\t   #\n");
         printf("####################################################\n");
         printf("####################################################\n");
-        printf("\t\t\t%-5s %-30s %-15s\n","ID:","NOME:","GENERO:");
-        printf("\t\t\t%-5d", g_aux->id);
-        printf("\t\t\t%-30s", g_aux->nome);
-        printf("\t\t\t%-15s\n", g_aux->genero);
-        if(print_question("Tem certeza que deseja deletar o jogo?") == 0)
+        printf("%-5s %-30s %-15s\n","ID:","NOME:","GENERO:");
+        printf("%-5d", g_aux->id);
+        printf("%-30s", g_aux->nome);
+        printf("%-15s\n", g_aux->genero);
+        if(print_question("Tem certeza que deseja deletar o jogo? [s/n]: ") == 0)
         {
-            
+            if(escolha == qt_games)
+            {
+                g_mem = (GAME *) realloc(g_mem, sizeof(GAME) * (qt_games - 1));
+            }
+            else
+            {
+                g_aux++;
+                aux = (*g_aux);
+                g_aux--;
+                (*g_aux) = aux;
+                g_mem = (GAME *) realloc(g_mem, sizeof(GAME) * (qt_games - 1));
+            }
+            qt_games -= 1;
         }
     }
 }
@@ -209,7 +221,6 @@ GAME *load_into_mem(int amount, int *times_req)
     GAME *buffer_mem = NULL;
     fseek(arquivo, 0, SEEK_END);
     long f_siz = ftell(arquivo);
-    printf("Size of file: %li\n", f_siz);
     if(f_siz != 0)
     {
         if(amount > 0)
