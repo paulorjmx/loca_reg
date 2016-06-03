@@ -134,14 +134,15 @@ void edit_game()
 
 void delete_game()
 {
-    GAME *g_aux, aux;
+    GAME *g_new = NULL;
+    int indice = 0, i = 0;
     unsigned int escolha;
     CLEAR_SCREEN();
     show_games();
     printf("\nDigite o ID do jogo que voce deseja deletar: ");
     scanf("%u", &escolha);
-    g_aux = binary_search(escolha);
-    if(g_aux == NULL)
+    indice = binary_search(escolha);
+    if(indice < 0)
     {
         printf("\nO jogo nao foi encontrado!\n");
     }
@@ -155,9 +156,9 @@ void delete_game()
         printf("####################################################\n");
         printf("####################################################\n");
         printf("%-5s %-30s %-15s\n","ID:","NOME:","GENERO:");
-        printf("%-5d", g_aux->id);
-        printf("%-30s", g_aux->nome);
-        printf("%-15s\n", g_aux->genero);
+        printf("%-5d", g_mem[indice].id);
+        printf("%-30s", g_mem[indice].nome);
+        printf("%-15s\n", g_mem[indice].genero);
         if(print_question("Tem certeza que deseja deletar o jogo? [s/n]: ") == 0)
         {
             if(escolha == qt_games)
@@ -166,13 +167,31 @@ void delete_game()
             }
             else
             {
-                g_aux++;
-                aux = (*g_aux);
-                g_aux--;
-                (*g_aux) = aux;
-                g_mem = (GAME *) realloc(g_mem, sizeof(GAME) * (qt_games - 1));
+                g_new =  (GAME *) malloc(sizeof(GAME) * (qt_games - 1));
+                if(g_new != NULL)
+                {
+                    for(i = 0; i < (qt_games - 1); i++)
+                    {
+                        if(i != indice)
+                        {
+                            g_new[i] = g_mem[i];
+                        }
+                        else
+                        {
+                            g_new[i] = g_mem[i+1];
+                            ++i;
+                        }
+                    }
+                    g_new[qt_games-2] = g_mem[qt_games-1];
+                    free(g_mem);
+                    g_mem = g_new;
+                    qt_games -= 1;
+                }
+                else
+                {
+                    printf("NAO FOI POSSIVEL ALOCAR MEMORIA\n");
+                }
             }
-            qt_games -= 1;
         }
     }
 }
@@ -262,16 +281,15 @@ int salva_alteracoes(const char *nome_arquivo, GAME *data_tob_write)
     }
 }
 
-GAME *binary_search(unsigned int id)
+int binary_search(unsigned int id)
 {
-    int limite_superior = qt_games-1, limite_inferior = 0, meio = 0;
-    GAME *g_aux = NULL;
+    int limite_superior = qt_games-1, limite_inferior = 0, meio = 0, indice = -1;
     while(limite_inferior <= limite_superior)
     {
         meio = (limite_superior + limite_inferior) / 2;
         if(g_mem[meio].id == id)
         {
-            g_aux = &g_mem[meio];
+            indice = meio;
             break;
         }
         else
@@ -289,5 +307,5 @@ GAME *binary_search(unsigned int id)
             }
         }
     }
-    return g_aux;
+    return indice;
 }
