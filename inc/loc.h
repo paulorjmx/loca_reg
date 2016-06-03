@@ -43,5 +43,5 @@
     GAME *load_into_mem(int amount, int *times_req); // Recupera um quantidade 'amount' de dados do arquivo apontado por 'arq'. Se 'amount' for < 0, então será lido o arquivo inteiro.
     FILE *abrir_arquivo(const char *nome_arquivo, char *modo); // Abre o arquivo com o nome 'nome_arquivo' em modo 'modo'
     int salva_alteracoes(const char *nome_arquivo, GAME *data_tob_write);
-    GAME *binary_search(unsigned int id);
+    int binary_search(unsigned int id); // Retorna o índice do vetor g_mem correspondente a 'id'
 #endif
