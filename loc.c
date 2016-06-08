@@ -77,7 +77,7 @@ void menu()
 
             case 5:
                 //part_mege(g_mem);
-                while(salva_alteracoes("locadora.dtb", g_mem) != 0)
+                if(salva_alteracoes("locadora.dtb", g_mem) != 0)
                     printf("NAO FOI POSSIVEL SALVAR AS ALTERACOES\n");
                 free(g_mem);
                 escolha = -1;
