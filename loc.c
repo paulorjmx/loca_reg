@@ -76,7 +76,7 @@ void menu()
                 break;
 
             case 5:
-                //part_mege(g_mem);
+                part_mege(g_mem, 0, (qt_games-1));
                 if(salva_alteracoes("locadora.dtb", g_mem) != 0)
                     printf("NAO FOI POSSIVEL SALVAR AS ALTERACOES\n");
                 free(g_mem);
@@ -129,7 +129,23 @@ int return_last_id()
 
 void edit_game()
 {
-
+	char decision;
+	unsigned int choice, indice;
+    CLEAR_SCREEN();
+    show_games();
+    printf("Digite ID do jogo que deseja editar");
+    scanf("%u", &choice);
+    indice = binary_search(choice);
+    printf("%u\t%s\t%s\n", g_mem[indice].id, g_mem[indice].nome, g_mem[indice].genero);
+	printf("Tem certeza que voce quer editar esse jogo? [s/n]: ");
+    scanf(" %c", &decision);
+    if(decision == 's' || decision == 'S')
+	{
+		printf("Mude o nome: ");
+		scanf("%[^\n]%s", g_mem[indice].nome);
+		printf("Mude o genero: ");
+		scanf("%[^\n]%s", g_mem[indice].genero);
+    }
 }
 
 void delete_game()
@@ -308,25 +324,25 @@ int binary_search(unsigned int id)
     return indice;
 }
 
-void part_merge(GAME *vetor_game,int left,int right){//breaks the ids into 3 arrays
+void mergesort(GAME *vetor_game,int left,int right){//breaks the ids into 3 arrays
   //g_mem = all IDs, qt_games = amount of ids
   int middle;
 
   if(left<right){
     middle = (left+right)/2; //finds the halfway point
-    part_merge(vetor_game,left,middle);//partitions the left side
-    part_merge(vetor_game,middle+1,right);//does it with the right
-    mergesort(vetor_game,left,middle,right);//merger
+    mergesort(vetor_game,left,middle);//partitions the left side
+    mergesort(vetor_game,middle+1,right);//does it with the right
+    merge(vetor_game,left,middle,right);//merger
   }
 }
 
-void mergesort(GAME *vetor_game,int left,int middle,int right){
+void merge(GAME *vetor_game,int left,int middle,int right){
   int l,r;
   int i,j,k; //indexes
 
   l = middle-left+1;//size of left subarray;
   r = right-middle;//size of right array;
-  int left_arr[l],right_arr[r];
+  GAME left_arr[l],right_arr[r];
   
   for(i=1;i<l;i++)  left_arr[i] = vetor_game[i];//subarray copies main arr
   for(j=1;j<r;j++){//right side values
