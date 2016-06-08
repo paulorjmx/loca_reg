@@ -6,9 +6,8 @@
     #include <unistd.h>
     typedef struct game
     {
-        int id;
+        unsigned int id;
         char nome[71], genero[31];
-        char deletable[1]; // Será deletável se este campo está com o valor < 0, caso contrário ainda existirá.
     } GAME;
 
 
