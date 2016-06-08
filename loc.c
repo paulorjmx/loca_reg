@@ -57,6 +57,10 @@ void menu()
 
             case 2:
                 edit_game();
+				while(print_question("Deseja editar mais algum jogo? [s/n]: ") == 0)
+				{
+					edit_game();
+				}
                 break;
 
             case 3:
@@ -76,7 +80,7 @@ void menu()
                 break;
 
             case 5:
-                part_mege(g_mem, 0, (qt_games-1));
+                mergesort(g_mem, 0, (qt_games-1));
                 if(salva_alteracoes("locadora.dtb", g_mem) != 0)
                     printf("NAO FOI POSSIVEL SALVAR AS ALTERACOES\n");
                 free(g_mem);
