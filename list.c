@@ -6,7 +6,9 @@ HEAD_LIST *cria_lista(char *genero)
 	{
 		printf("NAO FOI POSSIVEL ALOCA A CABECA DA LISTA!\n");
 		return NULL;
-	}	
+	}
+	cabeca->genero = (*genero);
+	cabeca->ptr_list = NULL;
 	return cabeca;
 }
 
