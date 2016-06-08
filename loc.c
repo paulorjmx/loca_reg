@@ -49,7 +49,7 @@ void menu()
         {
             case 1:
                 insert_game();
-                if(print_question("Deseja inserir mais algum jogo? [s/n]: ") == 0)
+                while(print_question("Deseja inserir mais algum jogo? [s/n]: ") == 0)
                 {
                     insert_game();
                 }
@@ -61,7 +61,7 @@ void menu()
 
             case 3:
                 delete_game();
-                if(print_question("Deseja deletar mais algum jogo? [s/n]: ") == 0)
+                while(print_question("Deseja deletar mais algum jogo? [s/n]: ") == 0)
                 {
                     delete_game();
                 }
@@ -69,7 +69,7 @@ void menu()
 
             case 4:
                 show_games();
-                if(print_question("Deseja mostrar os jogos cadastrados novamente? [s/n]: ") == 0)
+                while(print_question("Deseja mostrar os jogos cadastrados novamente? [s/n]: ") == 0)
                 {
                     show_games();
                 }
@@ -77,7 +77,7 @@ void menu()
 
             case 5:
                 //part_mege(g_mem);
-                if(salva_alteracoes("locadora.dtb", g_mem) != 0)
+                while(salva_alteracoes("locadora.dtb", g_mem) != 0)
                     printf("NAO FOI POSSIVEL SALVAR AS ALTERACOES\n");
                 free(g_mem);
                 escolha = -1;
@@ -172,26 +172,24 @@ void delete_game()
                 {
                     for(i = 0; i < (qt_games - 1); i++)
                     {
-                        if(i != indice)
+                        if(i >= indice)
                         {
-                            g_new[i] = g_mem[i];
+							g_new[i] = g_mem[i+1];
                         }
                         else
                         {
-                            g_new[i] = g_mem[i+1];
-                            ++i;
+                            g_new[i] = g_mem[i];
                         }
                     }
-                    g_new[qt_games-2] = g_mem[qt_games-1];
                     free(g_mem);
                     g_mem = g_new;
-                    qt_games -= 1;
                 }
                 else
                 {
                     printf("NAO FOI POSSIVEL ALOCAR MEMORIA\n");
                 }
             }
+			qt_games -= 1;
         }
     }
 }
@@ -308,4 +306,42 @@ int binary_search(unsigned int id)
         }
     }
     return indice;
+}
+
+void part_merge(GAME *vetor_game,int left,int right){//breaks the ids into 3 arrays
+  //g_mem = all IDs, qt_games = amount of ids
+  int middle;
+
+  if(left<right){
+    middle = (left+right)/2; //finds the halfway point
+    part_merge(vetor_game,left,middle);//partitions the left side
+    part_merge(vetor_game,middle+1,right);//does it with the right
+    mergesort(vetor_game,left,middle,right);//merger
+  }
+}
+
+void mergesort(GAME *vetor_game,int left,int middle,int right){
+  int l,r;
+  int i,j,k; //indexes
+
+  l = middle-left+1;//size of left subarray;
+  r = right-middle;//size of right array;
+  int left_arr[l],right_arr[r];
+  
+  for(i=1;i<l;i++)  left_arr[i] = vetor_game[i];//subarray copies main arr
+  for(j=1;j<r;j++){//right side values
+    i++;//if I don't increment i, it'll go over the last value of prev. loop
+    right_arr[j] = vetor_game[i];
+  }
+  i,j=1;
+
+  for(k=left;k<right;k++){//main array takes sorted values
+    if(left_arr[i].id <= right_arr[j].id){
+      vetor_game[k] = left_arr[i];
+      i++;
+    }else{
+      vetor_game[k] = right_arr[j];
+      j++;
+    }
+  }
 }
