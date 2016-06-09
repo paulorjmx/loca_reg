@@ -1,4 +1,5 @@
 #include "inc/loc.h"
+#include "inc/list.h"
 
 #ifdef _WIN32
     #define CLEAR_SCREEN() system("cls");
@@ -41,7 +42,8 @@ void menu()
         printf("\n\t\t[2] Editar Jogo");
         printf("\n\t\t[3] Deletar Jogo");
         printf("\n\t\t[4] Consultar Estoque");
-        printf("\n\t\t[5] Sair");
+		printf("\n\t\t[5] Testar lista");
+        printf("\n\t\t[6] Sair");
         printf("\n\t\t-> ");
         scanf("%d", &escolha);
 
@@ -78,8 +80,12 @@ void menu()
                     show_games();
                 }
                 break;
-
-            case 5:
+			
+			case 5:
+				HEAD_LIST *comeco = cria_lista("FPS");				
+				break;
+			
+            case 6:
                 mergesort(g_mem, 0, (qt_games-1));
                 if(salva_alteracoes("locadora.dtb", g_mem) != 0)
                     printf("NAO FOI POSSIVEL SALVAR AS ALTERACOES\n");
