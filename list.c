@@ -1,3 +1,5 @@
+#include "inc/list.h"
+
 HEAD_LIST *cria_lista(char *genero)
 {
 	HEAD_LIST *cabeca = NULL;
