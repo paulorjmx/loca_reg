@@ -74,16 +74,12 @@ void menu()
                 break;
 
             case 4:
-                show_games();
+                show_games(1);
                 while(print_question("Deseja mostrar os jogos cadastrados novamente? [s/n]: ") == 0)
                 {
-                    show_games();
+                    show_games(1);
                 }
                 break;
-
-			case 5:
-
-				break;
 
             case 6:
                 mergesort(g_mem, 0, (qt_games-1), &merge_byid); // Ordena o vetor g_mem levando em consideração o campo id;
@@ -142,7 +138,7 @@ void edit_game()
 	char decision;
 	unsigned int choice, indice;
     CLEAR_SCREEN();
-    show_games();
+    show_games(0);
     printf("\nDigite ID do jogo que deseja editar: ");
     scanf("%u", &choice);
     indice = binary_search(choice);
@@ -164,7 +160,7 @@ void delete_game()
     int indice = 0, i = 0;
     unsigned int escolha;
     CLEAR_SCREEN();
-    show_games();
+    show_games(0);
     printf("\nDigite o ID do jogo que voce deseja deletar: ");
     scanf("%u", &escolha);
     indice = binary_search(escolha);
@@ -245,16 +241,50 @@ void insert_game()
     }
 }
 
-void show_games()
+void show_games(int orderby)
 {
     int i = 0;
-    // mergesort(g_mem, 0, (qt_games - 1), &merge_bygen);
-    printf("%-5s %-30s %-15s\n","ID:","NOME:","GENERO:");
-    for(i = 0; i < qt_games; i++)
+    if(orderby == 0)
     {
-        printf("%-5d", g_mem[i].id);
-        printf("%-30s", g_mem[i].nome);
-        printf("%-15s\n", g_mem[i].genero);
+        printf("%-5s %-30s %-15s\n","ID:","NOME:","GENERO:");
+        for(i = 0; i < qt_games; i++)
+        {
+            printf("%-5d", g_mem[i].id);
+            printf("%-30s", g_mem[i].nome);
+            printf("%-15s\n", g_mem[i].genero);
+        }
+    }
+    else
+    {
+        printf("\nDeseja mostrar os jogos ordenando por: ");
+        printf("\n[1] Nome");
+        printf("\n[2] Genero");
+        printf("\n[3] ID");
+        printf("\n-> ");
+        scanf("%d", &i);
+        if(i == 1)
+        {
+            mergesort(g_mem, 0, (qt_games - 1), merge_byname);
+        }
+        else
+        {
+            if(i == 2)
+            {
+                mergesort(g_mem, 0, (qt_games - 1), merge_bygen);
+            }
+            else
+            {
+                mergesort(g_mem, 0, (qt_games - 1), merge_byid);
+            }
+        }
+
+        printf("%-5s %-30s %-15s\n","ID:","NOME:","GENERO:");
+        for(i = 0; i < qt_games; i++)
+        {
+            printf("%-5d", g_mem[i].id);
+            printf("%-30s", g_mem[i].nome);
+            printf("%-15s\n", g_mem[i].genero);
+        }
     }
 }
 
@@ -336,7 +366,7 @@ int binary_search(unsigned int id)
 }
 
 void mergesort(GAME *vetor_game, int left, int right, void (*merge_func)(GAME *v, int p, int q, int r)){//breaks the ids into 3 arrays
-  //g_mem = all IDs, qt_games = amount of ids
+
   int middle;
 
   if(left < right){
@@ -367,6 +397,37 @@ void merge_bygen(GAME *v, int p, int q, int r)
     for(k = p, i = 0, j = (n1 +1); k <= r; k++)
     {
         if(strcmp(w[i].genero, w[j].genero) <= 0)
+        {
+            v[k] = w[i++];
+        }
+        else
+        {
+            v[k] = w[j++];
+        }
+    }
+    free(w);
+}
+
+void merge_byname(GAME *v, int p, int q, int r)
+{
+    GAME *w = NULL;
+    int n1, n2, i, j, k;
+    n1 = (q - p) + 1;
+    n2 = r - q;
+    w = (GAME *) malloc(sizeof(GAME) * ((n1 + 1) + (n2 + 1)));
+    for(i = p, j = 0; i <= q; i++, j++)
+    {
+        w[j] = v[i];
+    }
+    for(i = q + 1, j = n1 + 1; i <= r; i++, j++)
+    {
+        w[j] = v[i];
+    }
+    w[n1].genero[0] = SCHAR_MAX;
+    w[n1+n2+1].genero[0] = SCHAR_MAX;
+    for(k = p, i = 0, j = (n1 +1); k <= r; k++)
+    {
+        if(strcmp(w[i].nome, w[j].nome) <= 0)
         {
             v[k] = w[i++];
         }
