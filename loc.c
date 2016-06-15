@@ -42,8 +42,7 @@ void menu()
         printf("\n\t\t[2] Editar Jogo");
         printf("\n\t\t[3] Deletar Jogo");
         printf("\n\t\t[4] Consultar Estoque");
-		printf("\n\t\t[5] Testar MergeSortByID");
-        printf("\n\t\t[6] Sair");
+        printf("\n\t\t[5] Sair");
         printf("\n\t\t-> ");
         scanf("%d", &escolha);
 
@@ -81,7 +80,7 @@ void menu()
                 }
                 break;
 
-            case 6:
+            case 5:
                 mergesort(g_mem, 0, (qt_games-1), &merge_byid); // Ordena o vetor g_mem levando em consideração o campo id;
                 if(salva_alteracoes("locadora.dtb", g_mem) != 0) // Tenta salvar as alterações no arquivo;
                     printf("NAO FOI POSSIVEL SALVAR AS ALTERACOES\n");
