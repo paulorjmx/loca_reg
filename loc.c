@@ -423,8 +423,8 @@ void merge_byname(GAME *v, int p, int q, int r)
     {
         w[j] = v[i];
     }
-    w[n1].genero[0] = SCHAR_MAX;
-    w[n1+n2+1].genero[0] = SCHAR_MAX;
+    w[n1].nome[0] = SCHAR_MAX;
+    w[n1+n2+1].nome[0] = SCHAR_MAX;
     for(k = p, i = 0, j = (n1 +1); k <= r; k++)
     {
         if(strcmp(w[i].nome, w[j].nome) <= 0)
