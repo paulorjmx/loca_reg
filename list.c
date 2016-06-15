@@ -9,7 +9,7 @@ HEAD_LIST *cria_lista(char *genero)
 		printf("NAO FOI POSSIVEL ALOCA A CABECA DA LISTA!\n");
 		return NULL;
 	}
-	cabeca->genero = (*genero);
+	cabeca->genero = genero;
 	cabeca->ptr_list = NULL;
 	return cabeca;
 }
@@ -23,9 +23,21 @@ int insere_comeco(HEAD_LIST *comeco, GAME *g)
 		printf("NAO FOI POSSIVEL ALOCAR UM NO!\n");
 		return -1;
 	}
+	new_node->g = g;
 	new_node->prox = comeco->ptr_list;
 	comeco->ptr_list = new_node;
 	return 0;
+}
+
+void imp_lista(HEAD_LIST *comeco)
+{
+	char esc;
+	LIST *pt_list = NULL;
+	for(pt_list = comeco->ptr_list; pt_list != NULL; pt_list = pt_list->prox)
+	{
+		printf("%s\n", pt_list->g->nome);
+		printf("%s\n\n", pt_list->g->genero);
+	}
 }
 
 void exclui_lista(HEAD_LIST *comeco)
@@ -42,5 +54,5 @@ void exclui_lista(HEAD_LIST *comeco)
 
 void insere_fim(HEAD_LIST *comeco)
 {
-	
+
 }
