@@ -42,7 +42,7 @@ void menu()
         printf("\n\t\t[2] Editar Jogo");
         printf("\n\t\t[3] Deletar Jogo");
         printf("\n\t\t[4] Consultar Estoque");
-		printf("\n\t\t[5] Testar lista");
+		printf("\n\t\t[5] Testar MergeSortByID");
         printf("\n\t\t[6] Sair");
         printf("\n\t\t-> ");
         scanf("%d", &escolha);
@@ -80,16 +80,16 @@ void menu()
                     show_games();
                 }
                 break;
-			
+
 			case 5:
-				HEAD_LIST *comeco = cria_lista("FPS");				
+
 				break;
-			
+
             case 6:
-                mergesort(g_mem, 0, (qt_games-1));
-                if(salva_alteracoes("locadora.dtb", g_mem) != 0)
+                mergesort(g_mem, 0, (qt_games-1), &merge_byid); // Ordena o vetor g_mem levando em consideração o campo id;
+                if(salva_alteracoes("locadora.dtb", g_mem) != 0) // Tenta salvar as alterações no arquivo;
                     printf("NAO FOI POSSIVEL SALVAR AS ALTERACOES\n");
-                free(g_mem);
+                free(g_mem); // libera o vetor para a estrutura GAME;
                 escolha = -1;
                 break;
 
@@ -143,7 +143,7 @@ void edit_game()
 	unsigned int choice, indice;
     CLEAR_SCREEN();
     show_games();
-    printf("Digite ID do jogo que deseja editar");
+    printf("\nDigite ID do jogo que deseja editar: ");
     scanf("%u", &choice);
     indice = binary_search(choice);
     printf("%u\t%s\t%s\n", g_mem[indice].id, g_mem[indice].nome, g_mem[indice].genero);
@@ -151,10 +151,10 @@ void edit_game()
     scanf(" %c", &decision);
     if(decision == 's' || decision == 'S')
 	{
-		printf("Mude o nome: ");
-		scanf("%[^\n]%s", g_mem[indice].nome);
-		printf("Mude o genero: ");
-		scanf("%[^\n]%s", g_mem[indice].genero);
+        printf("\nDigite o novo nome do jogo: ");
+        scanf(" %[^\n]s", g_mem[indice].nome);
+        printf("\nDigite o novo genero do jogo: ");
+        scanf(" %[^\n]s", g_mem[indice].genero);
     }
 }
 
@@ -248,6 +248,7 @@ void insert_game()
 void show_games()
 {
     int i = 0;
+    // mergesort(g_mem, 0, (qt_games - 1), &merge_bygen);
     printf("%-5s %-30s %-15s\n","ID:","NOME:","GENERO:");
     for(i = 0; i < qt_games; i++)
     {
@@ -334,40 +335,70 @@ int binary_search(unsigned int id)
     return indice;
 }
 
-void mergesort(GAME *vetor_game,int left,int right){//breaks the ids into 3 arrays
+void mergesort(GAME *vetor_game, int left, int right, void (*merge_func)(GAME *v, int p, int q, int r)){//breaks the ids into 3 arrays
   //g_mem = all IDs, qt_games = amount of ids
   int middle;
 
-  if(left<right){
+  if(left < right){
     middle = (left+right)/2; //finds the halfway point
-    mergesort(vetor_game,left,middle);//partitions the left side
-    mergesort(vetor_game,middle+1,right);//does it with the right
-    merge(vetor_game,left,middle,right);//merger
+    mergesort(vetor_game, left, middle, merge_func);//partitions the left side
+    mergesort(vetor_game, middle+1, right, merge_func);//does it with the right
+    merge_func(vetor_game, left, middle, right);//merger
   }
 }
 
-void merge(GAME *vetor_game,int left,int middle,int right){
-  int l,r;
-  int i,j,k; //indexes
-
-  l = middle-left+1;//size of left subarray;
-  r = right-middle;//size of right array;
-  GAME left_arr[l],right_arr[r];
-  
-  for(i=1;i<l;i++)  left_arr[i] = vetor_game[i];//subarray copies main arr
-  for(j=1;j<r;j++){//right side values
-    i++;//if I don't increment i, it'll go over the last value of prev. loop
-    right_arr[j] = vetor_game[i];
-  }
-  i,j=1;
-
-  for(k=left;k<right;k++){//main array takes sorted values
-    if(left_arr[i].id <= right_arr[j].id){
-      vetor_game[k] = left_arr[i];
-      i++;
-    }else{
-      vetor_game[k] = right_arr[j];
-      j++;
+void merge_bygen(GAME *v, int p, int q, int r)
+{
+    GAME *w = NULL;
+    int n1, n2, i, j, k;
+    n1 = (q - p) + 1;
+    n2 = r - q;
+    w = (GAME *) malloc(sizeof(GAME) * ((n1 + 1) + (n2 + 1)));
+    for(i = p, j = 0; i <= q; i++, j++)
+    {
+        w[j] = v[i];
     }
+    for(i = q + 1, j = n1 + 1; i <= r; i++, j++)
+    {
+        w[j] = v[i];
+    }
+    w[n1].genero[0] = SCHAR_MAX;
+    w[n1+n2+1].genero[0] = SCHAR_MAX;
+    for(k = p, i = 0, j = (n1 +1); k <= r; k++)
+    {
+        if(strcmp(w[i].genero, w[j].genero) <= 0)
+        {
+            v[k] = w[i++];
+        }
+        else
+        {
+            v[k] = w[j++];
+        }
+    }
+    free(w);
+}
+
+void merge_byid(GAME *vetor_game, int left, int middle, int right){
+  int l, r;
+  int i, j, k; //indexes
+
+  l = middle-left+1; //size of left subarray;
+  r = right-middle; //size of right array;
+  GAME left_arr[l+1], right_arr[r+1];
+
+  for(i = left, j = 0; i <= middle; i++, j++)  left_arr[j] = vetor_game[i];//subarray copies main arr
+  for(i = middle + 1, j = 0; i <= right; i++, j++) right_arr[j] = vetor_game[i];
+
+  left_arr[l].id = INT_MAX;
+  right_arr[r].id = INT_MAX;
+
+  for(k = left, i = 0, j = 0; k <= right; k++){//main array takes sorted values
+      if(left_arr[i].id <= right_arr[j].id){
+          vetor_game[k] = left_arr[i];
+          i++;
+      }else{
+          vetor_game[k] = right_arr[j];
+          j++;
+      }
   }
 }
