@@ -11,24 +11,6 @@
         char nome[71], genero[31];
     } GAME;
 
-
-	// ponteiro que irá apontar para os gêneros dos jogos seguindo a ordem:
-	/*
-		0 = FPS;
-		1 = HACK N SLASH;
-		2 = ACAO;
-		.
-		.
-		.
-		.
-		n = GENERO
-	*/
-
-	// pesquisa sera feita por genero ou por nome;
-	// implementar uma lista contendo jogos do gênero escolhido e nome em ordem alfabética ( de acordo pela letra inicial);
-	// algoritmo desfragmentador; (merge sort, ou quick sort)
-
-
     // Variáveis globais
     GAME *g_mem;
     int qt_games;
