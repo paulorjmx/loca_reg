@@ -1,20 +1,20 @@
 #include "inc/list.h"
 
-HEAD_LIST *cria_lista(char *genero)
+LIST *cria_lista(GAME *game)
 {
-	HEAD_LIST *cabeca = NULL;
-	cabeca = (HEAD_LIST *) malloc(sizeof(HEAD_LIST));
+	LIST *cabeca = NULL;
+	cabeca = (LIST *) malloc(sizeof(LIST));
 	if(cabeca == NULL)
 	{
 		printf("NAO FOI POSSIVEL ALOCA A CABECA DA LISTA!\n");
 		return NULL;
 	}
-	cabeca->genero = genero;
-	cabeca->ptr_list = NULL;
+	cabeca->g = game;
+	cabeca->prox = NULL;
 	return cabeca;
 }
 
-int insere_comeco(HEAD_LIST *comeco, GAME *g)
+int insere_comeco(LIST *comeco, GAME *g)
 {
 	LIST *new_node = NULL;
 	new_node = (LIST *) malloc(sizeof(LIST));
@@ -24,35 +24,38 @@ int insere_comeco(HEAD_LIST *comeco, GAME *g)
 		return -1;
 	}
 	new_node->g = g;
-	new_node->prox = comeco->ptr_list;
-	comeco->ptr_list = new_node;
+	new_node->prox = comeco->prox;
+	comeco->prox = new_node;
 	return 0;
 }
 
-void imp_lista(HEAD_LIST *comeco)
+void imp_lista(LIST *comeco)
 {
 	char esc;
 	LIST *pt_list = NULL;
-	for(pt_list = comeco->ptr_list; pt_list != NULL; pt_list = pt_list->prox)
+	for(pt_list = comeco; pt_list != NULL; pt_list = pt_list->prox)
 	{
-		printf("%s\n", pt_list->g->nome);
-		printf("%s\n\n", pt_list->g->genero);
+		printf("%-5d", pt_list->g->id);
+        printf("%-30s", pt_list->g->nome);
+        printf("%-15s\n", pt_list->g->genero);
 	}
 }
 
-void exclui_lista(HEAD_LIST *comeco)
+void exclui_lista(LIST *comeco)
 {
-	LIST *aux = NULL, *aux2 = NULL;
-	for(aux = comeco->ptr_list; aux != NULL; )
+	LIST *pt_slow = NULL, *pt_fast = NULL;
+	for(pt_slow = comeco, pt_fast = comeco->prox; pt_fast != NULL; pt_slow = pt_fast, pt_fast = pt_fast->prox)
 	{
-		aux2 = aux->prox;
-		free(aux);
-		aux = aux2;
+		free(pt_slow);
 	}
-	free(comeco);
+	free(pt_fast);
 }
 
-void insere_fim(HEAD_LIST *comeco)
+void insere_fim(LIST *comeco, GAME *g)
 {
-
+	LIST *ptr_list;
+	for(ptr_list = comeco; ptr_list->prox != NULL; ptr_list = ptr_list->prox);
+	ptr_list->prox = (LIST *) malloc(sizeof(LIST));
+	ptr_list->prox->g = g;
+	ptr_list->prox->prox = NULL;
 }
