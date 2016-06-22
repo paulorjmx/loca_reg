@@ -27,7 +27,7 @@ FILE *abrir_arquivo(const char *nome_arquivo, char *modo) // Abre o arquivo
 
 void menu()
 {
-    int escolha = 0;
+    char escolha;
     while(escolha > -1)
     {
         CLEAR_SCREEN();
@@ -44,11 +44,11 @@ void menu()
         printf("\n\t\t[4] Consultar Estoque");
         printf("\n\t\t[5] Sair");
         printf("\n\t\t-> ");
-        scanf("%d", &escolha);
+        scanf(" %c", &escolha);
 
         switch(escolha)
         {
-            case 1:
+            case '1':
                 insert_game();
                 while(print_question("Deseja inserir mais algum jogo? [s/n]: ") == 0)
                 {
@@ -56,7 +56,7 @@ void menu()
                 }
                 break;
 
-            case 2:
+            case '2':
                 edit_game();
 				while(print_question("Deseja editar mais algum jogo? [s/n]: ") == 0)
 				{
@@ -64,7 +64,7 @@ void menu()
 				}
                 break;
 
-            case 3:
+            case '3':
                 delete_game();
                 while(print_question("Deseja deletar mais algum jogo? [s/n]: ") == 0)
                 {
@@ -72,7 +72,7 @@ void menu()
                 }
                 break;
 
-            case 4:
+            case '4':
                 show_games(1);
                 while(print_question("Deseja mostrar os jogos cadastrados novamente? [s/n]: ") == 0)
                 {
@@ -80,7 +80,7 @@ void menu()
                 }
                 break;
 
-            case 5:
+            case '5':
                 mergesort(g_mem, 0, (qt_games-1), &merge_byid); // Ordena o vetor g_mem levando em consideração o campo id;
                 if(salva_alteracoes("locadora.dtb", g_mem) != 0) // Tenta salvar as alterações no arquivo;
                     printf("NAO FOI POSSIVEL SALVAR AS ALTERACOES\n");
@@ -135,11 +135,13 @@ int return_last_id()
 void edit_game()
 {
 	char decision;
-	unsigned int choice, indice;
+	int choice;
+	unsigned int indice;
     CLEAR_SCREEN();
     show_games(0);
     printf("\nDigite ID do jogo que deseja editar: ");
-    scanf("%u", &choice);
+    scanf(" %c", &decision);
+	choice = atoi(&decision);
     indice = binary_search(choice);
     printf("%u\t%s\t%s\n", g_mem[indice].id, g_mem[indice].nome, g_mem[indice].genero);
 	printf("Tem certeza que voce quer editar esse jogo? [s/n]: ");
@@ -157,12 +159,13 @@ void delete_game()
 {
     GAME *g_new = NULL;
     int indice = 0, i = 0;
-    unsigned int escolha;
+    char escolha;
     CLEAR_SCREEN();
     show_games(0);
     printf("\nDigite o ID do jogo que voce deseja deletar: ");
-    scanf("%u", &escolha);
-    indice = binary_search(escolha);
+    scanf(" %c", &escolha);
+	i = atoi(&escolha);
+    indice = binary_search(i);
     if(indice < 0)
     {
         printf("\nO jogo nao foi encontrado!\n");
@@ -242,7 +245,9 @@ void insert_game()
 
 void show_games(int orderby)
 {
+	LIST *comeco = NULL;
     int i = 0;
+	char escolha;
     if(orderby == 0)
     {
         printf("%-5s %-30s %-15s\n","ID:","NOME:","GENERO:");
@@ -260,16 +265,26 @@ void show_games(int orderby)
         printf("\n[2] Genero");
         printf("\n[3] ID");
         printf("\n-> ");
-        scanf("%d", &i);
-        if(i == 1)
+        scanf(" %c", &escolha);
+        if(escolha == '1')
         {
             mergesort(g_mem, 0, (qt_games - 1), merge_byname);
+			comeco = cria_lista(&g_mem[0]);
+			for(i = 1; i < qt_games; i++)
+			{
+				insere_fim(comeco, &g_mem[i]);
+			}
         }
         else
         {
-            if(i == 2)
+            if(escolha == '2')
             {
                 mergesort(g_mem, 0, (qt_games - 1), merge_bygen);
+				comeco = cria_lista(&g_mem[0]);
+				for(i = 1; i < qt_games; i++)
+				{
+					insere_fim(comeco, &g_mem[i]);
+				}
             }
             else
             {
@@ -278,12 +293,9 @@ void show_games(int orderby)
         }
 
         printf("%-5s %-30s %-15s\n","ID:","NOME:","GENERO:");
-        for(i = 0; i < qt_games; i++)
-        {
-            printf("%-5d", g_mem[i].id);
-            printf("%-30s", g_mem[i].nome);
-            printf("%-15s\n", g_mem[i].genero);
-        }
+		imp_lista(comeco);
+		exclui_lista(comeco);
+        
     }
 }
 
