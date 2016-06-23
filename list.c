@@ -6,7 +6,7 @@ LIST *cria_lista(GAME *game)
 	cabeca = (LIST *) malloc(sizeof(LIST));
 	if(cabeca == NULL)
 	{
-		printf("NAO FOI POSSIVEL ALOCA A CABECA DA LISTA!\n");
+		printf("NAO FOI POSSIVEL ALOCAR A LISTA!\n");
 		return NULL;
 	}
 	cabeca->g = game;
